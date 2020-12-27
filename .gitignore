@@ -130,8 +130,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-.idea/data-warehouse-redshift.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
+
+# pycharm
+.idea/
