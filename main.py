@@ -34,16 +34,17 @@ def main(argv):
     # get command from argv
     user_command = get_user_command(argv)
     if user_command == "create_redshift":
-        pass
+        aws.create_redshift_cluster()
     elif user_command == "delete_redshift":
-        pass
+        aws.delete_redshift_cluster()
     elif user_command == "help":
         print(usage)
     elif user_command == "check_credentials":
+
         if not aws.check_aws_credentials():
             print("credential check failed. exiting program with exit code 1")
             sys.exit(1)
-
+        
     else:
         print(f"User command {user_command} is not recognized.")
         print(usage)

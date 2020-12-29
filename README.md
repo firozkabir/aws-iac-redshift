@@ -38,3 +38,8 @@ echo -e "\nexport aws_access_key_id=AKIAIOSFODNN7EXAMPLE\nexport aws_secret_acce
 # boto3 will check ~/.aws/credentials for credentials by default 
 # see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#guide-configuration
 ```
+
+### Credits
+
+Some of the boto3 functions in iac.aws modules were lifted directly from https://docs.aws.amazon.com/code-samples. 
+In such cases, the function docstrings mention the url of the code-sample page. 
