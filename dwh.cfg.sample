@@ -1,0 +1,17 @@
+[AWS]
+KEY=<aws_access_key>
+SECRET=<aws_secret_key>
+REGION=<aws_region_ca-central-1>
+
+[DWH] 
+DWH_CLUSTER_TYPE=multi-node
+DWH_NUM_NODES=4
+DWH_NODE_TYPE=dc2.large
+
+DWH_IAM_ROLE_NAME=<iam_role_for_dwh>
+DWH_CLUSTER_IDENTIFIER=<cluster_name>
+DWH_DB=<db_name>
+DWH_DB_USER=<db_master_username>
+DWH_DB_PASSWORD=<db_master_password_upper_lower_number_required>
+DWH_PORT=<5439>
+DWH_DB_CONNECTION_STRING=<postgresql://username:password@host:port/database>
