@@ -83,7 +83,8 @@ def command_delete_redshift():
     if aws.delete_redshift_cluster(cluster_id=cluster_id,
                                         role_name=role_name,
                                         aws_key=aws_key, 
-                                        aws_secret=aws_secret
+                                        aws_secret=aws_secret,
+                                        aws_region=aws_region
                                     ):
                     
         print(f"delete_redshift command successful for cluster {cluster_id}")
@@ -115,6 +116,7 @@ def command_check_credentials():
         config.read('dwh.cfg')
         aws_key = config['AWS']['KEY']
         aws_secret = config['AWS']['SECRET']
+        aws_region = config['AWS']['REGION']
 
     except Exception as e:
         print("Encountered following exception while trying to retrieve KEY and SECRET from dwh.cfg file")
@@ -123,7 +125,8 @@ def command_check_credentials():
 
     # now calling STS service with the credentials retrieved for verification
     if not aws.check_credentials(aws_key=aws_key, 
-                                aws_secret=aws_secret):
+                                aws_secret=aws_secret,
+                                aws_region=aws_region):
         print("credential check failed. exiting program with exit code 1")
         sys.exit(1)
 

@@ -18,12 +18,13 @@ def sleep_countdown(sleep_seconds):
         sys.stdout.flush()
 
 
-def check_credentials(aws_key: str, aws_secret: str) -> bool:
+def check_credentials(aws_key: str, aws_secret: str, aws_region: str) -> bool:
 
     try:
         client = boto3.client('sts',
                             aws_access_key_id=aws_key,
                             aws_secret_access_key=aws_secret,
+                            region_name=aws_region
                             )
 
         response = client.get_caller_identity()
@@ -48,7 +49,8 @@ def check_credentials(aws_key: str, aws_secret: str) -> bool:
 
 def create_iam_role(role_name: str,
                     aws_key: str,
-                    aws_secret: str
+                    aws_secret: str,
+                    aws_region: str
                 ) -> str:
 
     """
@@ -67,7 +69,8 @@ def create_iam_role(role_name: str,
 
         iam_client = boto3.client('iam',
                                 aws_access_key_id=aws_key,
-                                aws_secret_access_key=aws_secret
+                                aws_secret_access_key=aws_secret,
+                                region_name=aws_region
                                 )
         
         print("creating the iam role")
@@ -95,14 +98,16 @@ def create_iam_role(role_name: str,
 
 def get_role_arn(role_name: str,
                 aws_key: str,
-                aws_secret: str) -> str:
+                aws_secret: str,
+                aws_region: str) -> str:
 
     
 
     try:
         iam_client = boto3.client('iam',
                                 aws_access_key_id=aws_key,
-                                aws_secret_access_key=aws_secret
+                                aws_secret_access_key=aws_secret,
+                                region_name=aws_region
                                 )
         response = iam_client.get_role(RoleName=role_name)
     except Exception as e:
@@ -186,14 +191,16 @@ def create_redshift_cluster(aws_key: str,
         print(f"Check if IAM Role {role_name} exists.")
         iam_role_arn = get_role_arn(role_name=role_name,
                                     aws_key=aws_key,
-                                    aws_secret=aws_secret
+                                    aws_secret=aws_secret,
+                                    aws_region=aws_region,
                                 )
         
         if not iam_role_arn:
             print("IAM Role {role_name} does not exist. Creating it now.")
             iam_role_arn = create_iam_role(role_name=role_name,
                                     aws_key=aws_key,
-                                    aws_secret=aws_secret
+                                    aws_secret=aws_secret,
+                                    aws_region=aws_region
                                 )
         
         print(f"We will use the role {iam_role_arn}")
@@ -279,7 +286,8 @@ def create_redshift_cluster(aws_key: str,
 def delete_redshift_cluster(cluster_id: str,
                             role_name: str,
                             aws_key: str,
-                            aws_secret: str
+                            aws_secret: str,
+                            aws_region: str
                             ) -> bool:
     """
         Deletes a given redshift cluster. Skips final snapshot when doing this. 
@@ -294,6 +302,7 @@ def delete_redshift_cluster(cluster_id: str,
         redshift_client = boto3.client('redshift',
                                         aws_access_key_id=aws_key,
                                         aws_secret_access_key=aws_secret,
+                                        region_name=aws_region
 
                                     )
         
