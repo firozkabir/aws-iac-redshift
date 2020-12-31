@@ -1,16 +1,13 @@
-# Data Warehouse with AWS Redshift and S3
+# AWS Infrastructure as Code for Redshift Cluster
 
-This project was submitted as project work for Udacity's Data Engineering Nano Degree. 
-
-## Project Requirements 
-
-## Features
+A small proejct to create / test / delete Redshift cluster on AWS programatically.
+Project is designed to automate the task of spawing and dropping AWS cluster using boto3 python3 sdk. 
 
 ## Development Environment Setup 
 
 * Clone this repo:
 ```bash
-git clone git@github.com:firozkabir/data-warehouse-redshift.git
+git clone git@github.com:firozkabir/aws-iac-redshift.git
 ```
 
 * Setup python virtual environment and install requirements:
