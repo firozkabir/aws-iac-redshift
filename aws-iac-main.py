@@ -10,18 +10,14 @@ import configparser
 def command_create_redshift():
     """
         Responsible for creating a redshift cluster. 
-        All the parameters are taken from dwh.cfg file
+        boto3 reads aws configs and credentials for [default] profile from ~/.aws 
+        Cluster specifications are read from aws.cfg
     """
     
     # trying to get the keys from dwh.cfg file
     try: 
         config = configparser.ConfigParser()
-        config.read('dwh.cfg')
-        aws_key = config['AWS']['KEY']
-        aws_secret = config['AWS']['SECRET']
-        aws_region = config['AWS']['REGION']
-
-        
+        config.read('aws-dwh.cfg')
         cluster_id = config['DWH']['DWH_CLUSTER_IDENTIFIER']
         role_name = config['DWH']['DWH_IAM_ROLE_NAME']
         db_name = config['DWH']['DWH_DB']
@@ -38,10 +34,7 @@ def command_create_redshift():
         print(f"{e}")
         sys.exit(1)    
     
-    redshift_connection_string = aws.create_redshift_cluster(aws_key=aws_key,
-                                                            aws_secret=aws_secret,
-                                                            aws_region=aws_region,
-                                                            cluster_id=cluster_id,
+    redshift_connection_string = aws.create_redshift_cluster(cluster_id=cluster_id,
                                                             role_name=role_name,
                                                             db_name=db_name,
                                                             db_username=db_username,
@@ -64,36 +57,27 @@ def command_create_redshift():
 
 def command_delete_redshift():
     """
-        Deletes the redshift cluster defined as DWH_CLUSTER_IDENTIFIER in DWH section of dwh.cfg
+        Deletes the redshift cluster defined as DWH_CLUSTER_IDENTIFIER in DWH section of aws-dwh.cfg
     """
     # trying to get the keys from dwh.cfg file
     try: 
         config = configparser.ConfigParser()
-        config.read('dwh.cfg')
-        aws_key = config['AWS']['KEY']
-        aws_secret = config['AWS']['SECRET']
-        aws_region = config['AWS']['REGION']
+        config.read('aws-dwh.cfg')
         cluster_id = config['DWH']['DWH_CLUSTER_IDENTIFIER']
         role_name = config['DWH']['DWH_IAM_ROLE_NAME']
     except Exception as e:
-        print("Encountered following exception while trying to retrieve parameters from dwh.cfg file")
+        print("Encountered following exception while trying to retrieve parameters from aws-dwh.cfg file")
         print(f"{e}")
         sys.exit(1)
 
     if aws.delete_redshift_cluster(cluster_id=cluster_id,
-                                        role_name=role_name,
-                                        aws_key=aws_key, 
-                                        aws_secret=aws_secret,
-                                        aws_region=aws_region
+                                        role_name=role_name
                                     ):
                     
         print(f"delete_redshift command successful for cluster {cluster_id}")
         print(f"cleaning up roles used  for this cluster")
         
-        if aws.cleanup_redshift_role(role_name=role_name,
-                                    aws_key=aws_key,
-                                    aws_secret=aws_secret,
-                                    aws_region=aws_region
+        if aws.cleanup_redshift_role(role_name=role_name
                                 ):
             print(f"Cleanup of role {role_name} successful")
         else:
@@ -106,27 +90,11 @@ def command_delete_redshift():
 def command_check_credentials():
     """
         A simple command to check your aws credentials
-        Reads the dwh.cfg file, extracts KEY and SECRET values from [AWS] section. 
         Then calls the AWS STS Service to verify the credentials, prints metadata supplied by STS.
     """
     
-    # trying to get the keys from dwh.cfg file
-    try: 
-        config = configparser.ConfigParser()
-        config.read('dwh.cfg')
-        aws_key = config['AWS']['KEY']
-        aws_secret = config['AWS']['SECRET']
-        aws_region = config['AWS']['REGION']
-
-    except Exception as e:
-        print("Encountered following exception while trying to retrieve KEY and SECRET from dwh.cfg file")
-        print(f"{e}")
-        sys.exit(1)
-
     # now calling STS service with the credentials retrieved for verification
-    if not aws.check_credentials(aws_key=aws_key, 
-                                aws_secret=aws_secret,
-                                aws_region=aws_region):
+    if not aws.check_credentials():
         print("credential check failed. exiting program with exit code 1")
         sys.exit(1)
 
@@ -134,12 +102,12 @@ def command_check_credentials():
 def command_check_redshift_connection():
     """
         A simple command to check redshift connection is working
-        Uses the DWH_DB_CONNECTION_STRING parameter in DWH section of dwh.cfg file
+        Uses the DWH_DB_CONNECTION_STRING parameter in DWH section of aws-dwh.cfg file
     """
     # trying to get the keys from dwh.cfg file
     try: 
         config = configparser.ConfigParser()
-        config.read('dwh.cfg')
+        config.read('aws-dwh.cfg')
         db_connection_string = config['DWH']['DWH_DB_CONNECTION_STRING']
     except Exception as e:
         print("Encountered following exception while trying to retrieve DWH_DB_CONNECTION_STRING from dwh.cfg file")
@@ -156,7 +124,7 @@ def command_check_redshift_connection():
 
 def main(argv):
 
-    cli_parser = argparse.ArgumentParser(prog='dwh',
+    cli_parser = argparse.ArgumentParser(prog='aws-iac-main',
                                         usage='%(prog)s --command <check_credentials | create_redshift | delete_redshift | check_redshift>',
                                         description='Cloud data warehouse application for udacity data engineering nano degree'
                                         )

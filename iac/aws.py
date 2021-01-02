@@ -18,14 +18,10 @@ def sleep_countdown(sleep_seconds):
         sys.stdout.flush()
 
 
-def check_credentials(aws_key: str, aws_secret: str, aws_region: str) -> bool:
+def check_credentials() -> bool:
 
     try:
-        client = boto3.client('sts',
-                            aws_access_key_id=aws_key,
-                            aws_secret_access_key=aws_secret,
-                            region_name=aws_region
-                            )
+        client = boto3.client('sts')
 
         response = client.get_caller_identity()
 
@@ -47,11 +43,7 @@ def check_credentials(aws_key: str, aws_secret: str, aws_region: str) -> bool:
 
 
 
-def create_iam_role(role_name: str,
-                    aws_key: str,
-                    aws_secret: str,
-                    aws_region: str
-                ) -> str:
+def create_iam_role(role_name: str) -> str:
 
     """
         Creates a new iam role for redshift cluster and attacheds S3 Readonly Access policy
@@ -67,11 +59,7 @@ def create_iam_role(role_name: str,
                                             'Version': '2012-10-17'}
                                             )
 
-        iam_client = boto3.client('iam',
-                                aws_access_key_id=aws_key,
-                                aws_secret_access_key=aws_secret,
-                                region_name=aws_region
-                                )
+        iam_client = boto3.client('iam')
         
         print("creating the iam role")
         iam_client.create_role(Path='/',
@@ -96,19 +84,12 @@ def create_iam_role(role_name: str,
 
 
 
-def get_role_arn(role_name: str,
-                aws_key: str,
-                aws_secret: str,
-                aws_region: str) -> str:
+def get_role_arn(role_name: str) -> str:
 
     
 
     try:
-        iam_client = boto3.client('iam',
-                                aws_access_key_id=aws_key,
-                                aws_secret_access_key=aws_secret,
-                                region_name=aws_region
-                                )
+        iam_client = boto3.client('iam')
         response = iam_client.get_role(RoleName=role_name)
     except Exception as e:
         print(f'ERROR: {e}')
@@ -137,18 +118,11 @@ def get_vpc_security_groupid(group_names):
         return group_id
 
 
-def add_inbound_rule_to_vpc(aws_key: str,
-                            aws_secret: str,
-                            aws_region: str,
-                            db_port: int,
+def add_inbound_rule_to_vpc(db_port: int,
                             vpc_id):
     
     try: 
-        ec2 = boto3.resource('ec2',
-                            region_name=aws_region,
-                            aws_access_key_id=aws_key,
-                            aws_secret_access_key=aws_secret
-                            )
+        ec2 = boto3.resource('ec2')
         
         print(f"Trying to open TCP port {db_port} from 0.0.0.0/0 (inbound) for default VPC security group")
         vpc = ec2.Vpc(id=vpc_id)
@@ -165,10 +139,7 @@ def add_inbound_rule_to_vpc(aws_key: str,
 
 
 
-def create_redshift_cluster(aws_key: str,
-                            aws_secret: str,
-                            aws_region: str,
-                            cluster_id: str,
+def create_redshift_cluster(cluster_id: str,
                             role_name: str,
                             db_name: str,
                             db_username: str,
@@ -189,28 +160,16 @@ def create_redshift_cluster(aws_key: str,
     try:
 
         print(f"Check if IAM Role {role_name} exists.")
-        iam_role_arn = get_role_arn(role_name=role_name,
-                                    aws_key=aws_key,
-                                    aws_secret=aws_secret,
-                                    aws_region=aws_region,
-                                )
+        iam_role_arn = get_role_arn(role_name=role_name)
         
         if not iam_role_arn:
             print("IAM Role {role_name} does not exist. Creating it now.")
-            iam_role_arn = create_iam_role(role_name=role_name,
-                                    aws_key=aws_key,
-                                    aws_secret=aws_secret,
-                                    aws_region=aws_region
-                                )
+            iam_role_arn = create_iam_role(role_name=role_name)
         
         print(f"We will use the role {iam_role_arn}")
 
 
-        redshift_client = boto3.client('redshift',
-                                    aws_access_key_id=aws_key,
-                                    aws_secret_access_key=aws_secret,
-                                    region_name=aws_region
-                                    )
+        redshift_client = boto3.client('redshift')
 
         print(f"---> creating redshift cluster {cluster_id} with {number_of_nodes} nodes <---")
         print(f"---> database name {db_name}, db_username {db_username} and db_password {db_password} <---")
@@ -257,12 +216,7 @@ def create_redshift_cluster(aws_key: str,
                 print(f"vpc_id: {vpc_id}")
 
                 print(f"Adding inbound tcp rule to vpc for port {db_port}")
-                add_inbound_rule_to_vpc(aws_key=aws_key, 
-                                aws_secret=aws_secret, 
-                                aws_region=aws_region, 
-                                db_port=db_port,
-                                vpc_id=vpc_id
-                                )
+                add_inbound_rule_to_vpc(db_port=db_port, vpc_id=vpc_id)
                 
                 return_string = db_connection_string
 
@@ -283,12 +237,7 @@ def create_redshift_cluster(aws_key: str,
         return return_string
 
 
-def delete_redshift_cluster(cluster_id: str,
-                            role_name: str,
-                            aws_key: str,
-                            aws_secret: str,
-                            aws_region: str
-                            ) -> bool:
+def delete_redshift_cluster(cluster_id: str, role_name: str) -> bool:
     """
         Deletes a given redshift cluster. Skips final snapshot when doing this. 
         Blocks until delete has gone through. 
@@ -299,12 +248,7 @@ def delete_redshift_cluster(cluster_id: str,
 
     try:
         
-        redshift_client = boto3.client('redshift',
-                                        aws_access_key_id=aws_key,
-                                        aws_secret_access_key=aws_secret,
-                                        region_name=aws_region
-
-                                    )
+        redshift_client = boto3.client('redshift')
         
         response = redshift_client.delete_cluster(ClusterIdentifier=cluster_id,
                                                 SkipFinalClusterSnapshot=True
@@ -338,21 +282,13 @@ def delete_redshift_cluster(cluster_id: str,
     return outcome
 
 
-def cleanup_redshift_role(role_name: str,
-                        aws_key: str,
-                        aws_secret: str,
-                        aws_region: str
-                        ) -> bool:
+def cleanup_redshift_role(role_name: str) -> bool:
     
     
 
     try:
 
-        iam_client = boto3.client('iam',
-                                aws_access_key_id=aws_key,
-                                aws_secret_access_key=aws_secret,
-                                region_name=aws_region
-                                )
+        iam_client = boto3.client('iam')
         
         iam_client.detach_role_policy(RoleName=role_name, PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess")
         iam_client.delete_role(RoleName=role_name)
