@@ -36,6 +36,39 @@ echo -e "\nexport aws_access_key_id=AKIAIOSFODNN7EXAMPLE\nexport aws_secret_acce
 # see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#guide-configuration
 ```
 
+
+## Run the program
+
+```bash
+./run-aws-iac.sh 
+usage: aws-iac-main --command <check_credentials | create_redshift | delete_redshift | check_redshift>
+aws-iac-main: error: the following arguments are required: --command
+```
+
+### check your credentials against AWS's STS service 
+```bash
+./run-aws-iac.sh --command check_credentials
+```
+
+### create a redshift cluster 
+```bash
+./run-aws-iac.sh --command create_redshift
+```
+
+
+### check connectivity to your redshift cluster
+```bash
+./run-aws-iac.sh --command check_redshift
+```
+
+
+### delete the redshift cluster
+```bash
+./run-aws-iac.sh --command delete_redshift
+```
+
+
+
 ### Credits
 
 Some of the boto3 functions in iac.aws modules were lifted directly from https://docs.aws.amazon.com/code-samples. 
